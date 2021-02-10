@@ -57,6 +57,7 @@ view: p_l_statement {
   dimension: hier_name {
     type: string
     sql: ${TABLE}."HIER_NAME" ;;
+    drill_fields: [net_amount]
   }
 
   dimension: hier1_name {
@@ -67,11 +68,15 @@ view: p_l_statement {
   dimension: hier2_name {
     type: string
     sql: ${TABLE}."HIER2_NAME" ;;
+    drill_fields: [hier_name]
   }
 
   dimension: hier3_name {
     type: string
     sql: ${TABLE}."HIER3_NAME" ;;
+    #drill_fields: [user_details*]
+    #drill_fields: [hier2_name,hier_name,net_amount]
+    drill_fields: [hier2_name]
   }
 
   dimension: hier4_name {
@@ -113,6 +118,10 @@ view: p_l_statement {
     type: number
     sql: ${TABLE}."GL_TRANSACTION_DATE_KEY" ;;
   }
+  #dimension: drill {
+   # sql: ${hier3_name} ;;
+    #drill_fields: [hier2_name, hier_name]
+ # }
 
   dimension: begin_balance {
     type: number
@@ -138,4 +147,12 @@ view: p_l_statement {
       begin_balance
     ]
   }
-}
+  measure: NetAmount{
+    type: sum
+    sql: ${net_amount} ;;
+    #drill_fields: [user_details*]
+
+  }
+ #set: user_details {
+#   fields: [hier2_name,hier_name,net_amount]
+ }

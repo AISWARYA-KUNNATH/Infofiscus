@@ -90,6 +90,26 @@ view: fact_shipment_daily {
     sql: ${TABLE}."D_ACTUAL_SHIP_DATE_KEY" ;;
   }
 
+  dimension: di_actual_ship_date_key {
+    type: string
+    sql: to_char(${d_actual_ship_date_key});;
+    }
+
+  dimension: Actual_Date_Key {
+    type: date
+    #datatype: date
+    sql: CAST(SUBSTRING(${di_actual_ship_date_key},1,4)
+          ||'-'|| SUBSTRING(${di_actual_ship_date_key},5,2)
+          ||'-'|| SUBSTRING(${di_actual_ship_date_key},7,2) As DATE) ;;
+}
+
+  dimension: dim_booked_date_key {
+    type: string
+    sql: to_char(${d_booked_date_key});;
+
+    # sql: (${d_booked_date_key});;
+  }
+
   dimension: d_bill_to_customer_key {
     type: number
     sql: ${TABLE}."D_BILL_TO_CUSTOMER_KEY" ;;
@@ -223,7 +243,7 @@ view: fact_shipment_daily {
     sql: ${TABLE}."ORDER_NUMBER" ;;
   }
 
-  dimension: order_qty {
+  dimension: dim_order_qty {
     type: number
     sql: ${TABLE}."ORDER_QTY" ;;
   }
@@ -253,12 +273,12 @@ view: fact_shipment_daily {
     sql: ${TABLE}."SHIP_TRANS_NUMBER" ;;
   }
 
-  dimension: shipment_amount {
+  dimension: dim_shipment_amount {
     type: number
     sql: ${TABLE}."SHIPMENT_AMOUNT" ;;
   }
 
-  dimension: shipment_qty {
+  dimension: dim_shipment_qty {
     type: number
     sql: ${TABLE}."SHIPMENT_QTY" ;;
   }
@@ -277,4 +297,7 @@ view: fact_shipment_daily {
     type: count
     drill_fields: []
   }
+
+
+
 }

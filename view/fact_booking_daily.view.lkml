@@ -70,7 +70,7 @@ view: fact_booking_daily {
     sql: ${TABLE}."ATTR9" ;;
   }
 
-  dimension: booking_qty {
+  dimension: dim_booking_qty {
     type: number
     sql: ${TABLE}."BOOKING_QTY" ;;
   }
@@ -80,12 +80,12 @@ view: fact_booking_daily {
     sql: ${TABLE}."COST_AT_BOOKING_PER_UNIT" ;;
   }
 
-  dimension: cost_booking_amount {
+  dimension: dim_cost_booking_amount {
     type: number
     sql: ${TABLE}."COST_BOOKING_AMOUNT" ;;
   }
 
-  dimension: cost_price_per_unit {
+  dimension: dim_cost_price_per_unit {
     type: number
     sql: ${TABLE}."COST_PRICE_PER_UNIT" ;;
   }
@@ -107,9 +107,33 @@ view: fact_booking_daily {
 
   dimension: d_booked_date_key {
     type: number
-    sql: ${TABLE}."D_BOOKED_DATE_KEY" ;;
+    sql:${TABLE}."D_BOOKED_DATE_KEY";;
   }
 
+ dimension: dim_booked_date_key {
+  type: string
+   sql: to_char(${d_booked_date_key});;
+
+   # sql: (${d_booked_date_key});;
+  }
+
+  dimension: Booked_Date_key{
+
+    type: date
+
+    #datatype: date
+
+    sql:CAST(SUBSTRING(${dim_booked_date_key}, 1, 4)
+    ||'-'||SUBSTRING(${dim_booked_date_key},5,2)
+    ||'-'||SUBSTRING(${dim_booked_date_key}, 7, 2) As DATE);;
+
+}
+
+  #dimension: dim_booked_date_key {
+      #type: date
+     # sql: CAST( ${di_booked_date_key}  As DATE );;
+       #html: {{ rendered_value | date: "%d-%m-%Y" }};;
+  #}
   dimension: d_end_customer_key {
     type: number
     sql: ${TABLE}."D_END_CUSTOMER_KEY" ;;
@@ -128,6 +152,19 @@ view: fact_booking_daily {
   dimension: d_promised_ship_date_key {
     type: number
     sql: ${TABLE}."D_PROMISED_SHIP_DATE_KEY" ;;
+  }
+
+  dimension: di_promised_ship_date_key {
+    type: string
+    sql: to_char(${d_promised_ship_date_key}) ;;
+  }
+
+  dimension: Promised_Date_key {
+    type: date
+    #datatype: date
+    sql: CAST(SUBSTRING(${di_promised_ship_date_key},1,4)
+          ||'-'|| SUBSTRING(${di_promised_ship_date_key},5,2)
+          ||'-'|| SUBSTRING(${di_promised_ship_date_key},7,2) As DATE) ;;
   }
 
   dimension: d_reseller_key {
@@ -228,17 +265,17 @@ view: fact_booking_daily {
     sql: ${TABLE}."ORDER_STATUS" ;;
   }
 
-  dimension: sale_price_per_unit {
+  dimension: dim_sale_price_per_unit {
     type: number
     sql: ${TABLE}."SALE_PRICE_PER_UNIT" ;;
   }
 
-  dimension: sales_booking_amount {
+  dimension: dim_sales_booking_amount {
     type: number
     sql: ${TABLE}."SALES_BOOKING_AMOUNT" ;;
   }
 
-  dimension: total_cogs_at_booking {
+  dimension: dim_total_cogs_at_booking {
     type: number
     sql: ${TABLE}."TOTAL_COGS_AT_BOOKING" ;;
   }
@@ -257,4 +294,49 @@ view: fact_booking_daily {
     type: count
     drill_fields: []
   }
+  measure:  Sales_Booking_Amount{
+    type: sum
+    sql: ${dim_sales_booking_amount} ;;
+  }
+  measure:  Booking_Qty{
+    type: sum
+    sql: ${dim_booking_qty} ;;
+  }
+  measure: Shipment_qty  {
+    type:sum
+    sql: ${fact_shipment_daily.dim_shipment_qty};;
+  }
+  measure: Shipment_amount  {
+    type: sum
+    sql: ${fact_shipment_daily.dim_shipment_amount} ;;
+  }
+  measure: Order_Qty {
+    type: sum
+    sql: ${fact_shipment_daily.dim_order_qty} ;;
+    }
+  measure:  cost_booking_amount  {
+    type: sum
+    sql: ${dim_cost_booking_amount} ;;
+  }
+  measure: sale_price_per_unit  {
+    type: sum
+    sql: ${dim_sale_price_per_unit} ;;
+  }
+  measure: Total_cogs_at_booking  {
+    type: sum
+    sql: ${dim_total_cogs_at_booking} ;;
+  }
+  measure: cost_price_per_unit  {
+    type: sum
+    sql: ${dim_cost_price_per_unit};;
+  }
+  measure: Gross_Margin_For_Item  {
+    type: sum
+    sql:${dim_sale_price_per_unit} - ${dim_cost_price_per_unit} / ${dim_sale_price_per_unit} ;;
+  }
+  measure: Total_Sales_Price  {
+    type: sum
+    sql: ${dim_sales_booking_amount};;
+  }
+
 }

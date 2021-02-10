@@ -1,6 +1,6 @@
 connection: "finance_datamart"
 include: "/view/**/*.view"
-label: "Infofiscus"
+label: "Infofiscus Finance"
 
 datagroup: infofiscus_income_expenses_default_datagroup {
   # sql_trigger: SELECT MAX(id) FROM etl_log;;
@@ -26,13 +26,14 @@ explore: fact_gljournals {
     relationship: many_to_many
     sql_on: ${fact_gljournals.posted_date_key} = ${dim_date.date_pkey} ;;
   }
-  join: dim_department {
-    type: left_outer
+
+  join:dim_department  {
+    type:left_outer
     relationship: many_to_many
     sql_on: ${fact_gljournals.d_dept_key} = ${dim_department.d_dept_key} ;;
   }
-  join: dim_entity {
-    type: inner
+  join:  dim_entity{
+    type: left_outer
     relationship: many_to_many
     sql_on: ${fact_gljournals.d_entity_key} = ${dim_entity.d_entity_key} ;;
   }
@@ -77,4 +78,9 @@ explore: p_l_statement {
 }
 explore: budget_detail_analysis {
   label: "Liquid Analysis 2"
+}
+
+explore: pnl_gl_journals_aggregation
+ {
+  label: "pnl Gl Journals Aggregation"
 }

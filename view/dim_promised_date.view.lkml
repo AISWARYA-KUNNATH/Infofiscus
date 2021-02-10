@@ -1,6 +1,6 @@
-view: dim_date {
-  sql_table_name: "FINANCE"."DIM_DATE"
-    ;;
+view: dim_promised_date {
+ sql_table_name: "FINANCE"."DIM_DATE"
+  ;;
 
   dimension: _holiday_ind {
     type: string
@@ -140,7 +140,7 @@ view: dim_date {
   dimension: month_name {
     type: string
     sql: ${TABLE}."MONTH_NAME" ;;
-   # order_by_field: date_pkey
+    # order_by_field: date_pkey
     order_by_field: "month_num_in_year"
 
   }
@@ -246,3 +246,5 @@ view: dim_date {
   }
 
 }
+
+# }

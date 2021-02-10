@@ -316,18 +316,13 @@ view: fact_gljournals {
     sql: ${TABLE}."TRANSACTION_TYPE_ID" ;;
   }
 
-dimension: Dim_Actual
-{
+dimension:Dim_Actual{
     type:number
-
- sql:
-      case when ${net_amount}<0
-
- THEN ${net_amount}*-1
-
- else ${net_amount}
-      END;;
-      }
+    sql:case when ${net_amount}<0
+    THEN ${net_amount}*-1
+    else ${net_amount}
+    END;;
+    }
 
   dimension_group: update_dt {
     type: time
