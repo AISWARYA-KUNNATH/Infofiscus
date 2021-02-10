@@ -9,7 +9,7 @@ datagroup: infofiscus_income_expenses_default_datagroup {
 
 persist_with: infofiscus_income_expenses_default_datagroup
 explore: fact_gljournals {
-  label: "Income and Expenses"
+  label: "Income and Expense"
   join: dim_account {
     type: left_outer
     relationship: many_to_one
