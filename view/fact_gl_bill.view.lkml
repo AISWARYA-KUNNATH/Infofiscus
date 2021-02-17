@@ -7,14 +7,11 @@ view: fact_gl_bill {
     sql: ${TABLE}."ACCOUNT_NUMBER" ;;
   }
 
-  dimension: dim_amount {
+  dimension: amount {
     type: number
     sql: ${TABLE}."AMOUNT" ;;
   }
-  measure: amount {
-    type: sum
-    sql: ${TABLE}."AMOUNT" ;;
-  }
+
 
   dimension: d_account_key {
     type: number
