@@ -192,6 +192,7 @@ view: fact_gl_bill {
       then ${Diff_Date} end  ;;
   }
 
+
   dimension_group: update_dt {
     type: time
     timeframes: [
@@ -242,5 +243,11 @@ view: fact_gl_bill {
   measure: Avg_Time_To_PayInvoices  {
     type: average
     sql: ${Time_To_PayInvoices} ;;
+    value_format: "0"
+  }
+ measure: Invoice_c_2015 {
+    type: sum
+    sql: case when ${dim_transaction.trans_due} = '2015'
+      then ${Invoices_C} end;;
   }
 }
