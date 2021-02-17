@@ -51,6 +51,10 @@ view: dim_vendors {
     ]
     sql: ${TABLE}."CREATE_DATE" ;;
   }
+  dimension: vendor_create {
+    type: date
+    sql:${TABLE}."CREATE_DATE"  ;;
+  }
 
   dimension: creditlimit {
     type: number

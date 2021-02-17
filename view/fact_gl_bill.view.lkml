@@ -11,17 +11,6 @@ view: fact_gl_bill {
     type: number
     sql: ${TABLE}."AMOUNT" ;;
   }
-  dimension:Dim_Amount{
-    type:number
-    sql:case when ${TABLE}."DUE_DATE" } < ${TABLE}."CREATE_DATE"  and ${TABLE}."STATUS" = "Open"
-          THEN ${TABLE}."AMOUNT"
-          else 0
-          END;;
-  }
-  measure: total_outstanding{
-    type: sum
-    sql: ${TABLE}."Dim_Amount" ;;
-  }
 
   dimension: d_account_key {
     type: number
@@ -157,6 +146,51 @@ view: fact_gl_bill {
     type: number
     sql: ${TABLE}."TOTAL_AMOUNT" ;;
   }
+  dimension: amt {
+    type: number
+    sql: case when ${dim_transaction.trans_due} < ${dim_vendors.vendor_create} and ${dim_transaction.status} = 'Open'
+    then ${amount} else 0 end  ;;
+  }
+  dimension: Overdue_Invoices_NC {
+    type: number
+    sql: case when ${dim_transaction.trans_due} < ${dim_vendors.vendor_create} and ${dim_transaction.status} = 'Open'
+      then ${d_transaction_key} end  ;;
+  }
+  dimension: Outstanding_Amount {
+    type: number
+    sql: case when ${dim_transaction.status} = 'Open'
+     then ${amount} else 0 end  ;;
+  }
+
+  dimension: Outstanding_Invoices_NC {
+    type: number
+    sql: case when ${dim_transaction.status} = 'Open'
+      then ${d_transaction_key} end ;;
+  }
+  dimension: Invoices_Amount_Clrd {
+    type: number
+    sql: case when ${dim_transaction.status} = 'Paid In Full'
+      then ${amount} else 0 end  ;;
+  }
+  dimension: Invoices_C {
+    type: number
+    sql: case when ${dim_transaction.status} = 'Paid In Full'
+      then ${d_transaction_key} end ;;
+  }
+  dimension: Overdue_Invoices_C {
+    type: number
+    sql: case when ${dim_transaction.trans_due} < ${dim_vendors.vendor_create} and ${dim_transaction.status} = 'Paid In Full'
+      then ${d_transaction_key} end  ;;
+  }
+  dimension: Diff_Date {
+    type: number
+    sql: DATEDIFF(day,${dim_transaction.trandate_day},${dim_vendors.vendor_create}) ;;
+  }
+  dimension: Time_To_PayInvoices {
+    type: number
+    sql: case when  ${dim_transaction.status} = 'Paid In Full'
+      then ${Diff_Date} end  ;;
+  }
 
   dimension_group: update_dt {
     type: time
@@ -176,5 +210,37 @@ view: fact_gl_bill {
   measure: count {
     type: count
     drill_fields: []
+  }
+  measure: Overdue_Amount {
+    type: sum
+    sql: ${amt} ;;
+  }
+  measure: Total_Outstanding_Amount {
+    type: sum
+    sql: ${Outstanding_Amount} ;;
+  }
+  measure: Outstanding_Invoices_NotCleared {
+    type: count_distinct
+    sql: ${Outstanding_Invoices_NC};;
+  }
+  measure: Overdue_Invoices_NotCleared {
+    type: count_distinct
+    sql: ${Overdue_Invoices_NC};;
+  }
+  measure: Total_Invoices_Amount_Cleared {
+    type: sum
+    sql: ${Invoices_Amount_Clrd} ;;
+  }
+  measure: Invoices_Cleared {
+    type: count_distinct
+    sql: ${Invoices_C};;
+  }
+  measure: Overdue_Invoices_Cleared {
+    type: count_distinct
+    sql: ${Overdue_Invoices_C};;
+  }
+  measure: Avg_Time_To_PayInvoices  {
+    type: average
+    sql: ${Time_To_PayInvoices} ;;
   }
 }

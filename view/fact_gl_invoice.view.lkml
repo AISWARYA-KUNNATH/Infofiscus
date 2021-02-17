@@ -12,6 +12,17 @@ view: fact_gl_invoice {
     sql: ${TABLE}."AMOUNT" ;;
   }
 
+  measure: Total_Outstanding_Amount {
+    type: sum
+    sql: ${TABLE}."AMOUNT"  ;;
+}
+
+
+  measure: DSO_Y {
+    type: running_total
+    sql: ${TABLE}."AMOUNT"  ;;
+  }
+
   dimension: d_account_key {
     type: number
     sql: ${TABLE}."D_ACCOUNT_KEY" ;;

@@ -238,6 +238,10 @@ view: dim_transaction {
     ]
     sql: ${TABLE}."DUE_DATE" ;;
   }
+ dimension: trans_due {
+   type: date
+  sql: ${TABLE}."DUE_DATE"  ;;
+ }
 
   dimension: email {
     type: string
@@ -889,6 +893,12 @@ view: dim_transaction {
       year
     ]
     sql: ${TABLE}."TRANDATE" ;;
+  }
+
+  dimension: trandate_day {
+    type: date
+    sql: ${TABLE}."TRANDATE" ;;
+
   }
 
   dimension: tranid {
