@@ -17,8 +17,12 @@ view: dim_transactionlines {
     sql: ${TABLE}."AMORTIZATION_RESIDUAL" ;;
   }
 
-  dimension: amount {
+  dimension: dim_amount {
     type: number
+    sql: ${TABLE}."AMOUNT" ;;
+  }
+  measure: amount {
+    type: sum
     sql: ${TABLE}."AMOUNT" ;;
   }
 
