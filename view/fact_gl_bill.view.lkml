@@ -11,7 +11,17 @@ view: fact_gl_bill {
     type: number
     sql: ${TABLE}."AMOUNT" ;;
   }
-
+  dimension:Dim_Amount{
+    type:number
+    sql:case when ${TABLE}."DUE_DATE" } < ${TABLE}."CREATE_DATE"  and ${TABLE}."STATUS" = "Open"
+          THEN ${TABLE}."AMOUNT"
+          else 0
+          END;;
+  }
+  measure: total_outstanding{
+    type: sum
+    sql: ${TABLE}."Dim_Amount" ;;
+  }
 
   dimension: d_account_key {
     type: number
