@@ -30,7 +30,7 @@ view: fact_gl_invoice {
 
   measure: Overdue_Invoices_not_cleared {
     type: count_distinct
-    sql: case when ${dim_transaction.trans_due} < ${dim_transaction.trandate_day} and ${dim_transaction.status} = 'Open'
+    sql: case when ${dim_transaction.trans_due} < TODAY-4 and ${dim_transaction.status} = 'Open'
       then ${d_invoice_key}  end  ;;
   }
 
