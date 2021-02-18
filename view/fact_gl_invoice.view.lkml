@@ -16,6 +16,7 @@ view: fact_gl_invoice {
     type: sum
     sql: case when ${dim_transaction.status} = 'Open'
     then ${amount} end  ;;
+    value_format: "0"
 }
 
   dimension: invoice_age_days {
@@ -23,7 +24,15 @@ view: fact_gl_invoice {
     sql: DATEDIFF(day,${dim_transaction.trandate_day},${dim_transaction.trans_due})  ;;
   }
 
-
+dimension: Aging_Buckets {
+  type: number
+  sql: case
+  when ${invoice_age_days} <= "15"  THEN '15 Days'
+  when ${invoice_age_days} <= "30"  THEN '30 Days'
+  when ${invoice_age_days} <= "60"  THEN '60 Days'
+  when ${invoice_age_days} <= "90"  THEN '90 Days'
+  else '91+ Days' end   ;;
+}
 
   measure: Overdue_Invoices_cleared {
     type: count_distinct
