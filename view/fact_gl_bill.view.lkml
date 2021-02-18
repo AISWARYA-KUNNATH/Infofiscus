@@ -165,7 +165,7 @@ view: fact_gl_bill {
   dimension: Outstanding_Invoices_NC {
     type: number
     sql: case when ${dim_transaction.status} = 'Open'
-      then ${d_transaction_key} end ;;
+      then ${dim_transaction.transaction_id} end ;;
   }
   dimension: Invoices_Amount_Clrd {
     type: number
@@ -180,8 +180,13 @@ view: fact_gl_bill {
   dimension: Overdue_Invoices_C {
     type: number
     sql: case when ${dim_transaction.trans_due} < ${dim_vendors.vendor_create} and ${dim_transaction.status} = 'Paid In Full'
-      then ${d_transaction_key} end  ;;
+      then ${d_transaction_key} else 0 end  ;;
   }
+  dimension: Payment_Terms {
+   type: number
+    sql: DATEDIFF(day,${dim_vendors.vendor_create},${dim_transaction.trans_due}) ;;
+  }
+
   dimension: Diff_Date {
     type: number
     sql: DATEDIFF(day,${dim_transaction.trandate_day},${dim_vendors.vendor_create}) ;;
@@ -224,7 +229,7 @@ view: fact_gl_bill {
     type: count_distinct
     sql: ${Outstanding_Invoices_NC};;
   }
-  measure: Overdue_Invoices_NotCleared {
+  measure: Overdue_Bill_NotCleared {
     type: count_distinct
     sql: ${Overdue_Invoices_NC};;
   }
@@ -245,9 +250,9 @@ view: fact_gl_bill {
     sql: ${Time_To_PayInvoices} ;;
     value_format: "0"
   }
- measure: Invoice_c_2015 {
-    type: sum
-    sql: case when ${dim_transaction.trans_due} = '2015'
-      then ${Invoices_C} end;;
+  measure: Avg_Payment_Terms {
+    type: average
+    sql: ${Payment_Terms} ;;
   }
+
 }

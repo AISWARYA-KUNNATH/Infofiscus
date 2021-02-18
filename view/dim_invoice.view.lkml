@@ -171,6 +171,10 @@ view: dim_invoice {
     ]
     sql: ${TABLE}."DATECREATED" ;;
   }
+  dimension: Invoice_date {
+    type: date
+    sql: ${TABLE}."DATECREATED"  ;;
+  }
 
   dimension: deferredrevenue {
     type: number

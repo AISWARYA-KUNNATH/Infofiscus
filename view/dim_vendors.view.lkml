@@ -358,4 +358,8 @@ view: dim_vendors {
     type: count
     drill_fields: [companyname, name, full_name]
   }
+  measure: Total_Vendors {
+    type: count_distinct
+    sql: ${full_name} ;;
+  }
 }

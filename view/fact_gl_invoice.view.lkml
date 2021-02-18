@@ -16,6 +16,18 @@ view: fact_gl_invoice {
     type: sum
     sql: ${TABLE}."AMOUNT"  ;;
 }
+  measure: Overdue_Invoices_cleared {
+    type: count_distinct
+    sql: case when ${dim_transaction.trans_due} < ${dim_transaction.trandate_day} and ${dim_transaction.status} = 'Paid In Full'
+      then ${d_invoice_key} else 0 end  ;;
+  }
+
+  measure: Invoices_cleared {
+    type: count_distinct
+    sql: case when ${dim_transaction.status} = 'Paid In Full'
+      then ${d_invoice_key} else 0 end  ;;
+  }
+
 
 
   measure: DSO_Y {
