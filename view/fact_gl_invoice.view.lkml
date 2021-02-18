@@ -14,8 +14,17 @@ view: fact_gl_invoice {
 
   measure: Total_Outstanding_Amount {
     type: sum
-    sql: ${TABLE}."AMOUNT"  ;;
+    sql: case when ${dim_transaction.status} = 'Open'
+    then ${amount} end  ;;
 }
+
+  dimension: invoice_age_days {
+    type: number
+    sql: DATEDIFF(day,${dim_transaction.trandate_day},${dim_transaction.trans_due})  ;;
+  }
+
+
+
   measure: Overdue_Invoices_cleared {
     type: count_distinct
     sql: case when ${dim_transaction.trans_due} < ${dim_transaction.trandate_day} and ${dim_transaction.status} = 'Paid In Full'
@@ -30,7 +39,7 @@ view: fact_gl_invoice {
 
   measure: Overdue_Invoices_not_cleared {
     type: count_distinct
-    sql: case when ${dim_transaction.trans_due} < TODAY-4 and ${dim_transaction.status} = 'Open'
+    sql: case when ${dim_transaction.trans_due} < current_date()-4 and ${dim_transaction.status} = 'Open'
       then ${d_invoice_key}  end  ;;
   }
 
