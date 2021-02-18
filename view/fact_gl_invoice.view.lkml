@@ -27,11 +27,11 @@ view: fact_gl_invoice {
 dimension: Aging_Buckets {
   type: number
   sql: case
-  when ${invoice_age_days} <= "15"  THEN '15 Days'
-  when ${invoice_age_days} <= "30"  THEN '30 Days'
-  when ${invoice_age_days} <= "60"  THEN '60 Days'
-  when ${invoice_age_days} <= "90"  THEN '90 Days'
-  else '91+ Days' end   ;;
+  when ${invoice_age_days} <= 15  THEN  '15Days'
+  when ${invoice_age_days} <= 30  THEN '30Days'
+  when ${invoice_age_days} <= 60  THEN '60Days'
+  when ${invoice_age_days} <= 90  THEN '90Days'
+  else '91+Days' as '91+ Days' end   ;;
 }
 
   measure: Overdue_Invoices_cleared {
