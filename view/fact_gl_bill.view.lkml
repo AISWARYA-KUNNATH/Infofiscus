@@ -106,6 +106,12 @@ view: fact_gl_bill {
     sql: ${TABLE}."TRANSACTION_DATE" ;;
   }
 
+  dimension: trandate_day {
+    type: date
+    sql: ${TABLE}."TRANSACTION_DATE";;
+
+  }
+
   dimension_group: transaction_date_created {
     type: time
     timeframes: [
@@ -134,6 +140,11 @@ view: fact_gl_bill {
     sql: ${TABLE}."TRANSACTION_DUE_DATE" ;;
   }
 
+  dimension: trans_due {
+    type: date
+    sql: ${TABLE}."TRANSACTION_DUE_DATE"  ;;
+  }
+
   dimension: transaction_id {
     type: number
     sql: ${TABLE}."TRANSACTION_ID" ;;
@@ -147,6 +158,12 @@ view: fact_gl_bill {
   dimension: transaction_status {
     type: string
     sql: ${TABLE}."TRANSACTION_STATUS" ;;
+  }
+
+  dimension: Outstanding_Amount {
+    type: number
+    sql: case when ${transaction_status} = 'Open'
+      then ${amount} else 0 end  ;;
   }
 
   dimension_group: update_dt {
@@ -164,8 +181,141 @@ view: fact_gl_bill {
     sql: ${TABLE}."UPDATE_DT" ;;
   }
 
+  dimension: amt {
+    type: number
+    sql: case when ${transaction_due_date} < ${dim_vendors.vendor_create} and ${transaction_status} = 'Open'
+      then ${amount} else 0 end  ;;
+  }
+
+  dimension: Invoices_C {
+    type: number
+    sql: case when ${transaction_status} = 'Paid In Full'
+      then ${d_transaction_key} end ;;
+  }
+
+  dimension: Invoices_Amount_Clrd {
+    type: number
+    sql: case when ${transaction_status} = 'Paid In Full'
+      then ${amount} else 0 end  ;;
+  }
+
+  dimension: Diff_Date {
+    type: number
+    sql: DATEDIFF(day,${trandate_day},${dim_vendors.vendor_create}) ;;
+  }
+
+  dimension: Time_To_PayInvoices {
+    type: number
+    sql: case when  ${transaction_status} = 'Paid In Full'
+      then ${Diff_Date} end  ;;
+  }
+
+  dimension: Overdue_Invoices_C {
+    type: number
+    sql: case when ${dim_vendors.vendor_create} > ${trans_due} and ${transaction_status} = 'Paid In Full'
+      then ${d_transaction_key} else 0 end  ;;
+  }
+
+  dimension: Outstanding_Invoices_NC {
+    type: number
+    sql: case when ${transaction_status} = 'Open'
+      then ${transaction_id} end ;;
+  }
+
+  dimension: Overdue_Invoices_NC {
+    type: number
+    sql: case when ${trans_due} < ${dim_vendors.vendor_create} and ${transaction_status} = 'Open'
+      then ${transaction_id} end  ;;
+  }
+
+  dimension: Payment_Terms {
+    type: number
+    sql: DATEDIFF(day,${dim_vendors.vendor_create},${transaction_due_date}) ;;
+  }
+
+  dimension: Invoice_Age_days  {
+    type: number
+    sql: DATEDIFF(day,${trandate_day},${trans_due}) ;;
+  }
+
+  dimension: Aging_Buckets {
+    case: {
+      when: {
+        sql: ${Invoice_Age_days} <= 15   ;;
+        label: "15 Days"
+      }
+
+      when: {
+        sql: ${Invoice_Age_days} <= 30 ;;
+        label: "30 Days"
+      }
+      when: {
+        sql: ${Invoice_Age_days} <= 60 ;;
+        label: "60 Days"
+      }
+      when: {
+        sql: ${Invoice_Age_days} <= 90 ;;
+        label: "90 Days"
+      }
+      when: {
+        sql: ${Invoice_Age_days} >= 91  ;;
+        label: "91 Days"
+      }
+    }
+  }
+
   measure: count {
     type: count
     drill_fields: []
+  }
+
+  measure: Total_Outstanding_Amount {
+    type: sum
+    sql: ${Outstanding_Amount} ;;
+  }
+
+  measure: Overdue_Amount {
+    type: sum
+    sql: ${amt} ;;
+  }
+
+  measure: Invoices_Cleared {
+    type: count_distinct
+    sql: ${Invoices_C};;
+  }
+
+  measure: Total_Invoices_Amount_Cleared {
+    type: sum
+    sql: ${Invoices_Amount_Clrd} ;;
+  }
+  measure: Avg_Time_To_PayInvoices  {
+    type: average
+    sql: ${Time_To_PayInvoices} ;;
+    value_format: "0"
+  }
+
+  measure: Overdue_Invoices_Cleared {
+    type: count_distinct
+    sql: ${Overdue_Invoices_C};;
+  }
+
+  measure: Outstanding_Invoices_NotCleared {
+    type: count_distinct
+    sql: ${Outstanding_Invoices_NC};;
+  }
+
+  measure: Overdue_Bill_NotCleared {
+    type: count_distinct
+    sql: ${Overdue_Invoices_NC};;
+  }
+
+  measure: Avg_Payment_Terms {
+    type: average
+    sql: ${Payment_Terms} ;;
+  }
+
+  measure: Aging {
+    type: number
+    sql: ${Invoice_Age_days} ;;
   }
 }
