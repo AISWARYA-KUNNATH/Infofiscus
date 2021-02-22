@@ -238,11 +238,41 @@ view: dim_transaction {
     ]
     sql: ${TABLE}."DUE_DATE" ;;
   }
- dimension: trans_due {
+  dimension: trans_due {
    type: date
   sql: ${TABLE}."DUE_DATE"  ;;
  }
 
+  dimension: Invoice_Age_days  {
+   type: number
+  sql: DATEDIFF(day,${trandate_day},${trans_due}) ;;
+  }
+
+  dimension: Aging_Buckets {
+    case: {
+      when: {
+        sql: ${Invoice_Age_days} <= 15   ;;
+        label: "15 Days"
+      }
+
+      when: {
+        sql: ${Invoice_Age_days} <= 30 ;;
+        label: "30 Days"
+      }
+      when: {
+        sql: ${Invoice_Age_days} <= 60 ;;
+        label: "60 Days"
+      }
+      when: {
+        sql: ${Invoice_Age_days} <= 90 ;;
+        label: "90 Days"
+      }
+      when: {
+        sql: ${Invoice_Age_days} >= 91  ;;
+        label: "91 Days"
+      }
+    }
+  }
   dimension: email {
     type: string
     sql: ${TABLE}."EMAIL" ;;
@@ -978,7 +1008,7 @@ view: dim_transaction {
 
   dimension: visible_in_customer_center {
     type: string
-    sql: ${TABLE}."VISIBLE_IN_CUSTOMER_CENTER" ;;
+    sql:  ${TABLE}."VISIBLE_IN_CUSTOMER_CENTER" ;;
   }
 
   dimension: weighted_total {
@@ -989,5 +1019,9 @@ view: dim_transaction {
   measure: count {
     type: count
     drill_fields: []
+  }
+  measure: Aging {
+    type: number
+    sql: ${Invoice_Age_days} ;;
   }
 }

@@ -27,24 +27,9 @@ view: fact_gl_bill {
     sql: ${TABLE}."D_CURRENCY_KEY" ;;
   }
 
-  dimension: d_customers_key {
+  dimension: d_entity_key {
     type: number
-    sql: ${TABLE}."D_CUSTOMERS_KEY" ;;
-  }
-
-  dimension: d_dept_key {
-    type: number
-    sql: ${TABLE}."D_DEPT_KEY" ;;
-  }
-
-  dimension: d_invoice_key {
-    type: number
-    sql: ${TABLE}."D_INVOICE_KEY" ;;
-  }
-
-  dimension: d_item_key {
-    type: number
-    sql: ${TABLE}."D_ITEM_KEY" ;;
+    sql: ${TABLE}."D_ENTITY_KEY" ;;
   }
 
   dimension: d_transaction_key {
@@ -62,39 +47,14 @@ view: fact_gl_bill {
     sql: ${TABLE}."D_VENDOR_KEY" ;;
   }
 
-  dimension: discount_amount {
-    type: number
-    sql: ${TABLE}."DISCOUNT_AMOUNT" ;;
-  }
-
-  dimension: discount_rate {
-    type: string
-    sql: ${TABLE}."DISCOUNT_RATE" ;;
-  }
-
   dimension: dw_key_id {
     type: string
     sql: ${TABLE}."DW_KEY_ID" ;;
   }
 
-  dimension: exchange_rate {
+  dimension: fact_bill_key {
     type: number
-    sql: ${TABLE}."EXCHANGE_RATE" ;;
-  }
-
-  dimension: fact_invoice_key {
-    type: number
-    sql: ${TABLE}."FACT_INVOICE_KEY" ;;
-  }
-
-  dimension: gross_profit_percent {
-    type: number
-    sql: ${TABLE}."GROSS_PROFIT_PERCENT" ;;
-  }
-
-  dimension: grossprofit {
-    type: number
-    sql: ${TABLE}."GROSSPROFIT" ;;
+    sql: ${TABLE}."FACT_BILL_KEY" ;;
   }
 
   dimension_group: insert_dt {
@@ -127,76 +87,67 @@ view: fact_gl_bill {
     sql: ${TABLE}."PENDING_AMOUNT" ;;
   }
 
-  dimension: subtotal {
-    type: number
-    sql: ${TABLE}."SUBTOTAL" ;;
+  dimension: tranid {
+    type: string
+    sql: ${TABLE}."TRANID" ;;
   }
 
-  dimension: tax_rate {
-    type: number
-    sql: ${TABLE}."TAX_RATE" ;;
+  dimension_group: transaction {
+    type: time
+    timeframes: [
+      raw,
+      time,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    sql: ${TABLE}."TRANSACTION_DATE" ;;
   }
 
-  dimension: tax_total {
-    type: number
-    sql: ${TABLE}."TAX_TOTAL" ;;
+  dimension_group: transaction_date_created {
+    type: time
+    timeframes: [
+      raw,
+      time,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    sql: ${TABLE}."TRANSACTION_DATE_CREATED" ;;
   }
 
-  dimension: total_amount {
-    type: number
-    sql: ${TABLE}."TOTAL_AMOUNT" ;;
-  }
-  dimension: amt {
-    type: number
-    sql: case when ${dim_transaction.trans_due} < ${dim_vendors.vendor_create} and ${dim_transaction.status} = 'Open'
-    then ${amount} else 0 end  ;;
-  }
-  dimension: Overdue_Invoices_NC {
-    type: number
-    sql: case when ${dim_transaction.trans_due} < ${dim_vendors.vendor_create} and ${dim_transaction.status} = 'Open'
-      then ${d_transaction_key} end  ;;
-  }
-  dimension: Outstanding_Amount {
-    type: number
-    sql: case when ${dim_transaction.status} = 'Open'
-     then ${amount} else 0 end  ;;
+  dimension_group: transaction_due {
+    type: time
+    timeframes: [
+      raw,
+      time,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    sql: ${TABLE}."TRANSACTION_DUE_DATE" ;;
   }
 
-  dimension: Outstanding_Invoices_NC {
+  dimension: transaction_id {
     type: number
-    sql: case when ${dim_transaction.status} = 'Open'
-      then ${dim_transaction.transaction_id} end ;;
-  }
-  dimension: Invoices_Amount_Clrd {
-    type: number
-    sql: case when ${dim_transaction.status} = 'Paid In Full'
-      then ${amount} else 0 end  ;;
-  }
-  dimension: Invoices_C {
-    type: number
-    sql: case when ${dim_transaction.status} = 'Paid In Full'
-      then ${d_transaction_key} end ;;
-  }
-  dimension: Overdue_Invoices_C {
-    type: number
-    sql: case when ${dim_transaction.trans_due} < ${dim_vendors.vendor_create} and ${dim_transaction.status} = 'Paid In Full'
-      then ${d_transaction_key} else 0 end  ;;
-  }
-  dimension: Payment_Terms {
-   type: number
-    sql: DATEDIFF(day,${dim_vendors.vendor_create},${dim_transaction.trans_due}) ;;
+    sql: ${TABLE}."TRANSACTION_ID" ;;
   }
 
-  dimension: Diff_Date {
+  dimension: transaction_line_id {
     type: number
-    sql: DATEDIFF(day,${dim_transaction.trandate_day},${dim_vendors.vendor_create}) ;;
-  }
-  dimension: Time_To_PayInvoices {
-    type: number
-    sql: case when  ${dim_transaction.status} = 'Paid In Full'
-      then ${Diff_Date} end  ;;
+    sql: ${TABLE}."TRANSACTION_LINE_ID" ;;
   }
 
+  dimension: transaction_status {
+    type: string
+    sql: ${TABLE}."TRANSACTION_STATUS" ;;
+  }
 
   dimension_group: update_dt {
     type: time
@@ -217,42 +168,4 @@ view: fact_gl_bill {
     type: count
     drill_fields: []
   }
-  measure: Overdue_Amount {
-    type: sum
-    sql: ${amt} ;;
-  }
-  measure: Total_Outstanding_Amount {
-    type: sum
-    sql: ${Outstanding_Amount} ;;
-  }
-  measure: Outstanding_Invoices_NotCleared {
-    type: count_distinct
-    sql: ${Outstanding_Invoices_NC};;
-  }
-  measure: Overdue_Bill_NotCleared {
-    type: count_distinct
-    sql: ${Overdue_Invoices_NC};;
-  }
-  measure: Total_Invoices_Amount_Cleared {
-    type: sum
-    sql: ${Invoices_Amount_Clrd} ;;
-  }
-  measure: Invoices_Cleared {
-    type: count_distinct
-    sql: ${Invoices_C};;
-  }
-  measure: Overdue_Invoices_Cleared {
-    type: count_distinct
-    sql: ${Overdue_Invoices_C};;
-  }
-  measure: Avg_Time_To_PayInvoices  {
-    type: average
-    sql: ${Time_To_PayInvoices} ;;
-    value_format: "0"
-  }
-  measure: Avg_Payment_Terms {
-    type: average
-    sql: ${Payment_Terms} ;;
-  }
-
 }
