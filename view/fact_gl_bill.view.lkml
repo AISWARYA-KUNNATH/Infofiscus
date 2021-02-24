@@ -190,7 +190,7 @@ view: fact_gl_bill {
   dimension: Invoices_C {
     type: number
     sql: case when ${transaction_status} = 'Paid In Full'
-      then ${d_transaction_key} end ;;
+      then ${transaction_id} end ;;
   }
 
   dimension: Invoices_Amount_Clrd {
@@ -213,7 +213,7 @@ view: fact_gl_bill {
   dimension: Overdue_Invoices_C {
     type: number
     sql: case when ${dim_vendors.vendor_create} > ${trans_due} and ${transaction_status} = 'Paid In Full'
-      then ${d_transaction_key} else 0 end  ;;
+      then ${transaction_id} else 0 end  ;;
   }
 
   dimension: Outstanding_Invoices_NC {
