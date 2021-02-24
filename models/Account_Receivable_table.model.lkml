@@ -27,22 +27,23 @@ explore: fact_gl_invoice{
     sql_on: ${fact_gl_invoice.d_currency_key} = ${dim_currencies.d_currency_key} ;;
   }
 
-  join: dim_customers  {
+  join: dim_fin_customers  {
     type:left_outer
     relationship: many_to_one
-    sql_on: ${fact_gl_invoice.d_customers_key} = ${dim_customers.d_customers_key} ;;
+    sql_on: ${fact_gl_invoice.d_customers_key} = ${dim_fin_customers.d_f_customers_key};;
   }
 
-  join:dim_department  {
-    type:left_outer
-    relationship: many_to_one
-    sql_on: ${fact_gl_invoice.d_dept_key} = ${dim_department.d_dept_key} ;;
-  }
   join: dim_item {
     type: left_outer
     relationship: many_to_one
     sql_on: ${fact_gl_invoice.d_item_key} = ${dim_item.d_item_key} ;;
   }
+  join: dim_vendors {
+    type: left_outer
+    relationship: many_to_one
+    sql_on: ${fact_gl_invoice.d_tax_vendor_key} = ${dim_vendors.d_vendor_key} ;;
+  }
+
 
 
 }

@@ -32,24 +32,14 @@ view: fact_gl_invoice {
     sql: ${TABLE}."D_CUSTOMERS_KEY" ;;
   }
 
-  dimension: d_dept_key {
-    type: number
-    sql: ${TABLE}."D_DEPT_KEY" ;;
-  }
-
   dimension: d_item_key {
     type: number
     sql: ${TABLE}."D_ITEM_KEY" ;;
   }
 
-  dimension: d_transaction_key {
+  dimension: d_tax_vendor_key {
     type: number
-    sql: ${TABLE}."D_TRANSACTION_KEY" ;;
-  }
-
-  dimension: d_transactionlines_key {
-    type: number
-    sql: ${TABLE}."D_TRANSACTIONLINES_KEY" ;;
+    sql: ${TABLE}."D_TAX_VENDOR_KEY" ;;
   }
 
   dimension_group: date_created {
