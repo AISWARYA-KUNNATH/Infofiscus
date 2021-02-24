@@ -271,6 +271,11 @@ view: fact_gl_invoice {
     type: number
     sql: DATEDIFF(day,${created_date},${Trandue_date}) ;;
   }
+  dimension: Invoices_Amount_Clrd {
+    type: number
+    sql: case when ${inv_status} = 'Paid In Full'
+      then ${amount} else 0 end  ;;
+  }
 
 
 
@@ -321,5 +326,9 @@ view: fact_gl_invoice {
   measure: Avg_Payment_Terms {
     type: average
     sql: ${Payment_Terms} ;;
+  }
+  measure: Total_Invoices_Amount_Cleared {
+    type: sum
+    sql: ${Invoices_Amount_Clrd} ;;
   }
 }
