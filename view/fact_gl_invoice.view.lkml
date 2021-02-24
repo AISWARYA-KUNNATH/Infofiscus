@@ -57,6 +57,11 @@ view: fact_gl_invoice {
     sql: ${TABLE}."DATE_CREATED" ;;
   }
 
+  dimension: created_date {
+    type: date
+    sql: ${TABLE}."DATE_CREATED" ;;
+  }
+
   dimension: discount_amount {
     type: number
     sql: ${TABLE}."DISCOUNT_AMOUNT" ;;
@@ -79,6 +84,10 @@ view: fact_gl_invoice {
     ]
     convert_tz: no
     datatype: date
+    sql: ${TABLE}."DUE_DATE" ;;
+  }
+  dimension: Trandue_date {
+    type: date
     sql: ${TABLE}."DUE_DATE" ;;
   }
 
@@ -180,6 +189,10 @@ view: fact_gl_invoice {
     ]
     sql: ${TABLE}."TRANDATE" ;;
   }
+  dimension: tran_date {
+    type: date
+    sql: ${TABLE}."TRANDATE" ;;
+  }
 
   dimension: transaction_id {
     type: number
@@ -190,6 +203,76 @@ view: fact_gl_invoice {
     type: number
     sql: ${TABLE}."TRANSACTION_LINE_ID" ;;
   }
+  dimension: Invoices_C {
+    type: number
+    sql: case when ${inv_status} = 'Paid In Full'
+      then ${transaction_id} end ;;
+  }
+
+  dimension: Outstanding_Invoices_NC {
+    type: number
+    sql: case when ${inv_status}= 'Open'
+      then ${transaction_id} end ;;
+  }
+  dimension: Overdue_Invoices_C {
+    type: number
+    sql: case when ${tran_date} > ${Trandue_date} and ${inv_status} = 'Paid In Full'
+      then ${transaction_id}   end  ;;
+  }
+  dimension: Overdue_Invoices_NC {
+    type: number
+    sql: case when add_years(-7,now()) > ${Trandue_date} and ${inv_status} = 'Open'
+      then ${transaction_id}   end  ;;
+  }
+  dimension: Invoice_Age_days  {
+    type: number
+    sql: DATEDIFF(day,${Trandue_date},${created_date}) ;;
+  }
+  dimension: Aging_Buckets {
+    case: {
+      when: {
+        sql: ${Invoice_Age_days} <= 15   ;;
+        label: "15 Days"
+      }
+
+      when: {
+        sql: ${Invoice_Age_days} <= 30 ;;
+        label: "30 Days"
+      }
+      when: {
+        sql: ${Invoice_Age_days} <= 60 ;;
+        label: "60 Days"
+      }
+      when: {
+        sql: ${Invoice_Age_days} <= 90 ;;
+        label: "90 Days"
+      }
+      when: {
+        sql: ${Invoice_Age_days} >= 91  ;;
+        label: "91 Days"
+      }
+    }
+  }
+  dimension: Outstanding_Amount {
+    type: number
+    sql: case when ${inv_status} = 'Open'
+      then ${amount} else 0 end  ;;
+  }
+  dimension: Time_To_PayInvoices {
+    type: number
+    sql: case when  ${inv_status} = 'Paid In Full'
+      then ${Diff_Date} end  ;;
+  }
+  dimension: Diff_Date {
+    type: number
+    sql: DATEDIFF(day,${date_created_date},${tran_date}) ;;
+  }
+  dimension: Payment_Terms {
+    type: number
+    sql: DATEDIFF(day,${created_date},${Trandue_date}) ;;
+  }
+
+
 
   dimension_group: update_dt {
     type: time
@@ -209,5 +292,34 @@ view: fact_gl_invoice {
   measure: count {
     type: count
     drill_fields: []
+  }
+  measure: Invoices_Cleared {
+    type: count_distinct
+    sql: ${Invoices_C};;
+  }
+  measure: Outstanding_Invoices_NotCleared {
+    type: count_distinct
+    sql: ${Outstanding_Invoices_NC};;
+  }
+  measure: Overdue_Invoices_Cleared {
+    type: count_distinct
+    sql: ${Overdue_Invoices_C};;
+  }
+  measure: Overdue_Invoices_Not_Cleared {
+    type: count_distinct
+    sql: ${Overdue_Invoices_NC};;
+  }
+  measure: Total_Outstanding_Amount {
+    type: sum
+    sql: ${Outstanding_Amount} ;;
+  }
+  measure: Avg_Time_To_PayInvoices  {
+    type: average
+    sql: ${Time_To_PayInvoices} ;;
+    value_format: "0"
+  }
+  measure: Avg_Payment_Terms {
+    type: average
+    sql: ${Payment_Terms} ;;
   }
 }

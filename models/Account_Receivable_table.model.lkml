@@ -43,7 +43,4 @@ explore: fact_gl_invoice{
     relationship: many_to_one
     sql_on: ${fact_gl_invoice.d_tax_vendor_key} = ${dim_vendors.d_vendor_key} ;;
   }
-
-
-
 }
