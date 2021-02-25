@@ -31,9 +31,5 @@ explore: fact_gl_bill{
     relationship: many_to_one
     sql_on: ${fact_gl_bill.d_vendor_key} = ${dim_vendors.d_vendor_key} ;;
   }
-  join: dim_entity {
-    type: left_outer
-    relationship: many_to_one
-    sql_on: ${fact_gl_bill.d_entity_key} = ${dim_entity.d_entity_key} ;;
-  }
+
 }

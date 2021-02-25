@@ -27,21 +27,6 @@ view: fact_gl_bill {
     sql: ${TABLE}."D_CURRENCY_KEY" ;;
   }
 
-  dimension: d_entity_key {
-    type: number
-    sql: ${TABLE}."D_ENTITY_KEY" ;;
-  }
-
-  dimension: d_transaction_key {
-    type: number
-    sql: ${TABLE}."D_TRANSACTION_KEY" ;;
-  }
-
-  dimension: d_transactionlines_key {
-    type: number
-    sql: ${TABLE}."D_TRANSACTIONLINES_KEY" ;;
-  }
-
   dimension: d_vendor_key {
     type: number
     sql: ${TABLE}."D_VENDOR_KEY" ;;
@@ -105,11 +90,9 @@ view: fact_gl_bill {
     ]
     sql: ${TABLE}."TRANSACTION_DATE" ;;
   }
-
   dimension: trandate_day {
     type: date
-    sql: ${TABLE}."TRANSACTION_DATE";;
-
+    sql:${TABLE}."TRANSACTION_DATE"  ;;
   }
 
   dimension_group: transaction_date_created {
@@ -140,11 +123,6 @@ view: fact_gl_bill {
     sql: ${TABLE}."TRANSACTION_DUE_DATE" ;;
   }
 
-  dimension: trans_due {
-    type: date
-    sql: ${TABLE}."TRANSACTION_DUE_DATE"  ;;
-  }
-
   dimension: transaction_id {
     type: number
     sql: ${TABLE}."TRANSACTION_ID" ;;
@@ -158,12 +136,6 @@ view: fact_gl_bill {
   dimension: transaction_status {
     type: string
     sql: ${TABLE}."TRANSACTION_STATUS" ;;
-  }
-
-  dimension: Outstanding_Amount {
-    type: number
-    sql: case when ${transaction_status} = 'Open'
-      then ${amount} else 0 end  ;;
   }
 
   dimension_group: update_dt {
@@ -180,7 +152,6 @@ view: fact_gl_bill {
     datatype: date
     sql: ${TABLE}."UPDATE_DT" ;;
   }
-
   dimension: amt {
     type: number
     sql: case when ${transaction_due_date} < ${dim_vendors.vendor_create} and ${transaction_status} = 'Open'
@@ -212,7 +183,7 @@ view: fact_gl_bill {
 
   dimension: Overdue_Invoices_C {
     type: number
-    sql: case when ${dim_vendors.vendor_create} > ${trans_due} and ${transaction_status} = 'Paid In Full'
+    sql: case when ${dim_vendors.vendor_create} > ${transaction_due_date} and ${transaction_status} = 'Paid In Full'
       then ${transaction_id} else 0 end  ;;
   }
 
@@ -224,7 +195,7 @@ view: fact_gl_bill {
 
   dimension: Overdue_Invoices_NC {
     type: number
-    sql: case when ${trans_due} < ${dim_vendors.vendor_create} and ${transaction_status} = 'Open'
+    sql: case when ${transaction_due_date} < ${dim_vendors.vendor_create} and ${transaction_status} = 'Open'
       then ${transaction_id} end  ;;
   }
 
@@ -235,7 +206,12 @@ view: fact_gl_bill {
 
   dimension: Invoice_Age_days  {
     type: number
-    sql: DATEDIFF(day,${trandate_day},${trans_due}) ;;
+    sql: DATEDIFF(day,${trandate_day},${transaction_due_date}) ;;
+  }
+  dimension: Outstanding_Amount {
+    type: number
+    sql: case when ${transaction_status} = 'Open'
+      then ${amount} else 0 end  ;;
   }
 
   dimension: Aging_Buckets {
@@ -318,4 +294,6 @@ view: fact_gl_bill {
     type: number
     sql: ${Invoice_Age_days} ;;
   }
+
+
 }
